@@ -1,0 +1,29 @@
+{
+  "name": "jev-model-router",
+  "version": "0.1.0",
+  "description": "Claude Code plugin for routing tasks to the right model.",
+  "author": {
+    "name": "Juan M. Carballo",
+    "email": "jm.carb@gmail.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "model",
+    "router"
+  ],
+  "userConfig": {
+    "typesafeApiKey": {
+      "type": "string",
+      "title": "TypeSafe API key",
+      "description": "Key for TypeSafe's own API; preferred over the Gateway, since only it reports a calibrated confidence",
+      "default": "",
+      "sensitive": true
+    },
+    "showDecisions": {
+      "type": "boolean",
+      "title": "Show routing decisions",
+      "description": "Print the model and effort the router picks as a message in the Claude Code UI",
+      "default": true
+    }
+  }
+}
