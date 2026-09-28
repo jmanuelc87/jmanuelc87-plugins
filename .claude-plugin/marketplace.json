@@ -1,0 +1,15 @@
+{
+  "name": "jmanuelc87-plugins",
+  "description": "Claude Code plugins by jmanuelc87.",
+  "owner": {
+    "name": "Juan M. Carballo",
+    "email": "jm.carb@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "jev-model-router",
+      "source": "./plugins/jev-model-router",
+      "description": "Claude Code plugin for routing tasks to the right model."
+    }
+  ]
+}
