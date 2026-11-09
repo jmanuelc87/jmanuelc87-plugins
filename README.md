@@ -7,6 +7,7 @@ A Claude Code plugin marketplace by jmanuelc87.
 | Plugin | Description |
 | --- | --- |
 | [jev-model-router](plugins/jev-model-router) | Routes each prompt to the right model and effort level. |
+| [dev-skills](plugins/dev-skills) | Developer skills by jmanuelc87. |
 | [off-skills](plugins/off-skills) | Off-hours skills by jmanuelc87. |
 
 ## Install
@@ -15,6 +16,11 @@ Add this repo as a marketplace, then install a plugin from it:
 
 ```
 /plugin marketplace add git@github.com:jmanuelc87/jmanuelc87-plugins.git
+```
+
+to add a specific plugin to the repo use:
+
+```
 /plugin install jev-model-router@jmanuelc87-plugins
 ```
 
