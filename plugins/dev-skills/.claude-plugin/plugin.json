@@ -1,0 +1,14 @@
+{
+  "name": "dev-skills",
+  "version": "0.1.0",
+  "description": "Developer skills by jmanuelc87.",
+  "author": {
+    "name": "Juan M. Carballo",
+    "email": "jm.carb@gmail.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "developer"
+  ]
+}

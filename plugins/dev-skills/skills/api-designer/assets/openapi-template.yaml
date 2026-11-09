@@ -1,0 +1,239 @@
+openapi: 3.1.0
+# Contract-first OpenAPI starting point. Copy to a working location and adapt — don't hand back
+# the blank template. It encodes the conventions from references/design-conventions.md: plural
+# noun resources, cursor pagination, a single structured error shape, idempotency keys, specific
+# status codes, and security applied per-operation. Delete what you don't need; keep it consistent.
+
+info:
+  title: Example API
+  version: "1.0.0"
+  description: >-
+    One- or two-paragraph overview: who this is for, the auth model, the base URL(s),
+    rate limits, and the versioning/compatibility promise.
+
+servers:
+  - url: https://api.example.com/v1
+    description: Production
+
+security:
+  - bearerAuth: []          # default: every operation requires auth unless it overrides this
+
+tags:
+  - name: orders
+    description: Create and manage orders.
+
+paths:
+  /orders:
+    get:
+      tags: [orders]
+      summary: List orders
+      description: Returns a cursor-paginated list of orders. Newest first by default.
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+        - name: status
+          in: query
+          description: Filter by order status.
+          schema:
+            $ref: '#/components/schemas/OrderStatus'
+        - name: sort
+          in: query
+          description: "Comma-separated fields; leading '-' for descending. e.g. -created_at"
+          schema: { type: string, default: "-created_at" }
+      responses:
+        '200':
+          description: A page of orders.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OrderList' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+    post:
+      tags: [orders]
+      summary: Create an order
+      description: >-
+        Creates an order. Supply an Idempotency-Key so a retried request does not create a
+        duplicate; the original result is returned for repeats within 24h.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OrderCreate' }
+      responses:
+        '201':
+          description: Order created.
+          headers:
+            Location:
+              description: URL of the created order.
+              schema: { type: string, format: uri }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/UnprocessableEntity' }
+
+  /orders/{order_id}:
+    parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [orders]
+      summary: Get an order
+      responses:
+        '200':
+          description: The order.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    Limit:
+      name: limit
+      in: query
+      description: Max items per page (1–100).
+      schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+    Cursor:
+      name: cursor
+      in: query
+      description: Opaque cursor from a previous response's next_cursor.
+      schema: { type: string }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: Client-generated unique key (e.g. UUID) to make creation safe to retry.
+      schema: { type: string }
+
+  schemas:
+    OrderStatus:
+      type: string
+      enum: [pending, paid, shipped, cancelled, refunded]
+      description: Clients should tolerate unknown future values.
+
+    Money:
+      type: object
+      description: Amount in minor units (e.g. cents) paired with an ISO 4217 currency. Never floats.
+      required: [amount_minor, currency]
+      properties:
+        amount_minor: { type: integer, example: 1999 }
+        currency: { type: string, example: "USD", minLength: 3, maxLength: 3 }
+
+    Order:
+      type: object
+      required: [id, status, total, created_at]
+      properties:
+        id: { type: string, example: "ord_01HX...", description: Opaque, non-sequential ID. }
+        status: { $ref: '#/components/schemas/OrderStatus' }
+        total: { $ref: '#/components/schemas/Money' }
+        created_at: { type: string, format: date-time, description: ISO 8601, UTC. }
+        # Expose only intended fields — never serialize internal columns.
+
+    OrderCreate:
+      type: object
+      required: [customer_id, line_items]
+      additionalProperties: false   # reject unexpected fields (prevents mass-assignment)
+      properties:
+        customer_id: { type: string }
+        line_items:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            type: object
+            required: [sku, quantity]
+            properties:
+              sku: { type: string }
+              quantity: { type: integer, minimum: 1, maximum: 1000 }
+
+    OrderList:
+      type: object
+      required: [data, has_more]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Order' }
+        next_cursor:
+          type: string
+          nullable: true
+          description: Pass as `cursor` to fetch the next page. Null when has_more is false.
+        has_more: { type: boolean }
+
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: Stable, machine-readable code clients can branch on.
+              example: validation_failed
+            message:
+              type: string
+              description: Human-readable, safe to surface. Never leaks internals.
+            details:
+              type: array
+              description: Field-level validation errors.
+              items:
+                type: object
+                properties:
+                  field: { type: string }
+                  code: { type: string }
+                  message: { type: string }
+            request_id:
+              type: string
+              description: Correlate to server logs.
+
+  responses:
+    BadRequest:
+      description: Malformed request.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: Missing or invalid authentication.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Conflict:
+      description: Conflicts with current state (e.g. duplicate).
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    UnprocessableEntity:
+      description: Well-formed but semantically invalid.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    TooManyRequests:
+      description: Rate limit exceeded.
+      headers:
+        Retry-After:
+          description: Seconds to wait before retrying.
+          schema: { type: integer }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }

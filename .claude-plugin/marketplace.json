@@ -10,6 +10,11 @@
       "name": "jev-model-router",
       "source": "./plugins/jev-model-router",
       "description": "Claude Code plugin for routing tasks to the right model."
+    },
+    {
+      "name": "dev-skills",
+      "source": "./plugins/dev-skills",
+      "description": "Developer skills by jmanuelc87."
     }
   ]
 }
