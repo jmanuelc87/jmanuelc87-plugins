@@ -1,0 +1,14 @@
+{
+  "name": "off-skills",
+  "version": "0.1.0",
+  "description": "Off-hours skills by jmanuelc87.",
+  "author": {
+    "name": "Juan M. Carballo",
+    "email": "jm.carb@gmail.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "personal"
+  ]
+}

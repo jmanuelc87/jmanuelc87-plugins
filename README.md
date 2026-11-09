@@ -7,6 +7,7 @@ A Claude Code plugin marketplace by jmanuelc87.
 | Plugin | Description |
 | --- | --- |
 | [jev-model-router](plugins/jev-model-router) | Routes each prompt to the right model and effort level. |
+| [off-skills](plugins/off-skills) | Off-hours skills by jmanuelc87. |
 
 ## Install
 

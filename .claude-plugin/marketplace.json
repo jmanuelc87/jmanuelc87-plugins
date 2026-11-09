@@ -15,6 +15,11 @@
       "name": "dev-skills",
       "source": "./plugins/dev-skills",
       "description": "Developer skills by jmanuelc87."
+    },
+    {
+      "name": "off-skills",
+      "source": "./plugins/off-skills",
+      "description": "Off-hours skills by jmanuelc87."
     }
   ]
 }
