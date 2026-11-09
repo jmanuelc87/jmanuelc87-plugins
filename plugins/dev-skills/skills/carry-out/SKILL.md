@@ -81,10 +81,6 @@ so and describe what you verified by hand.
 
 ### 6. Report
 
-Commit all relevant changes, push the branch, and create a Pull Request (PR). 
-Update the corresponding Linear issue status, add a comment summarizing the work completed, 
-and check off all completed checklist items. Ensure all changes are properly synchronized and linked to the PR.
-
 Finish with a short report:
 - **Completed:** each checklist item with its status (done, skipped, blocked) and the evidence
   (command run, result).
